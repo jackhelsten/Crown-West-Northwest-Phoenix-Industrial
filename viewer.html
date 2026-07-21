@@ -1863,7 +1863,7 @@ function addMarker(pin){
   // Drag support via invisible draggable marker
   const drag=L.marker([pin.lat,pin.lon],{
     icon:L.divIcon({className:'',html:'<div style="width:50px;height:50px;cursor:move"></div>',iconSize:[50,50],iconAnchor:[25,25]}),
-    draggable:true,opacity:0,zIndexOffset:600
+    draggable:false,opacity:0,zIndexOffset:600
   }).addTo(pinLayer);
 
   drag.on('click',e=>{L.DomEvent.stopPropagation(e);selectPin(pin.id);});
@@ -3170,7 +3170,7 @@ function startEditing(ov){
     const vll=rotLL(rawLat,rawLng,ov.rotation||0);
     return L.marker([vll.lat,vll.lng],{
       icon:L.divIcon({className:'',html:'<div style="'+cStyle+';cursor:'+cur+'"></div>',iconSize:[0,0],iconAnchor:[0,0]}),
-      draggable:true,zIndexOffset:600
+      draggable:false,zIndexOffset:600
     }).addTo(handleGroup);
   }
 
@@ -3182,7 +3182,7 @@ function startEditing(ov){
   // Rotation handle (yellow)
   const cRot=L.marker(rotHandleLL(),{
     icon:L.divIcon({className:'',html:'<div style="width:20px;height:20px;background:#edc948;border:2.5px solid #fff;border-radius:50%;box-shadow:0 1px 5px rgba(0,0,0,.6);margin:-10px 0 0 -10px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#15171c;cursor:grab">↻</div>',iconSize:[0,0],iconAnchor:[0,0]}),
-    draggable:true,zIndexOffset:800
+    draggable:false,zIndexOffset:800
   }).addTo(handleGroup);
 
   const rotLine=L.polyline([L.latLngBounds(sw,ne).getCenter(), rotHandleLL()],
@@ -3194,7 +3194,7 @@ function startEditing(ov){
     const vll=rotLL(rawLat,rawLng,ov.rotation||0);
     return L.marker([vll.lat,vll.lng],{
       icon:L.divIcon({className:'',html:'<div style="'+mStyle+';cursor:'+cur+'"></div>',iconSize:[0,0],iconAnchor:[0,0]}),
-      draggable:true,zIndexOffset:590
+      draggable:false,zIndexOffset:590
     }).addTo(handleGroup);
   }
 
@@ -3294,7 +3294,7 @@ function startEditing(ov){
   const mvStyle='width:22px;height:22px;background:#76b7b2;border:2.5px solid #fff;border-radius:50%;box-shadow:0 1px 5px rgba(0,0,0,.6);margin:-11px 0 0 -11px;display:flex;align-items:center;justify-content:center;font-size:13px;color:#15171c;font-weight:900';
   const cCenter=L.marker(b.getCenter(),{
     icon:L.divIcon({className:'',html:'<div style="'+mvStyle+';cursor:move">✥</div>',iconSize:[0,0],iconAnchor:[0,0]}),
-    draggable:true,zIndexOffset:700
+    draggable:false,zIndexOffset:700
   }).addTo(handleGroup);
 
   let lastLL=b.getCenter();
@@ -3433,7 +3433,7 @@ function rebuildNWHandles(){
   // ── Vertex handles — drag to move existing point ──────────────────────────
   pts.forEach(function(coord,i){
     var h=L.marker(coord,{
-      draggable:true,
+      draggable:false,
       zIndexOffset:1000,
       icon:L.divIcon({
         className:'',
@@ -3457,7 +3457,7 @@ function rebuildNWHandles(){
     var mLat=(coord[0]+next[0])/2;
     var mLon=(coord[1]+next[1])/2;
     var mid=L.marker([mLat,mLon],{
-      draggable:true,
+      draggable:false,
       zIndexOffset:900,
       icon:L.divIcon({
         className:'',
@@ -4747,7 +4747,7 @@ function buildEH(park){
   editHandles=[];
   park.coords.forEach(function(coord,i){
     var col=park.color||DEF;
-    var m=L.marker([coord[0],coord[1]],{draggable:true,zIndexOffset:1100,
+    var m=L.marker([coord[0],coord[1]],{draggable:false,zIndexOffset:1100,
       icon:L.divIcon({className:'',iconSize:[0,0],
         html:'<div style="width:12px;height:12px;background:'+col+';border:2px solid #fff;border-radius:50%;margin-top:-6px;margin-left:-6px;box-shadow:0 0 4px rgba(0,0,0,0.5);cursor:grab"></div>'
       })}).addTo(EH_LG);
@@ -5276,12 +5276,11 @@ setTimeout(function(){ if(typeof buildMarketSummary==='function') buildMarketSum
   try{ window.applyPin=function(){}; window.deletePin=function(){}; }catch(e){}
   try{ window._pkDel=function(){}; }catch(e){}
   try{ window.pushUndo=function(){}; }catch(e){}
-  var tries=0;
-  var t=setInterval(function(){
-    tries++;
-    try{ if(window.map){ map.eachLayer(function(l){ if(l.dragging){ try{l.dragging.disable();}catch(e){} } }); } }catch(e){}
-    if(tries>20) clearInterval(t);
-  }, 800);
+  // Permanently disable dragging on any layer, now and forever
+  try{ L.Marker.mergeOptions({draggable:false}); }catch(e){}
+  setInterval(function(){
+    try{ if(window.map){ map.eachLayer(function(l){ if(l.dragging&&l.dragging.enabled()){ try{l.dragging.disable();}catch(e){} } }); } }catch(e){}
+  }, 1500);
   try{ window.addingPin=false; }catch(e){}
 })();
 </script>
